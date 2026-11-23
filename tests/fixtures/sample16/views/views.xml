@@ -1,0 +1,33 @@
+<odoo>
+    <record id="view_move_line_form" model="ir.ui.view">
+        <field name="name">stock.move.line.form.sample</field>
+        <field name="model">stock.move.line</field>
+        <field name="inherit_id" ref="stock.view_move_line_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='qty_done']" position="after">
+                <field name="note" attrs="{'invisible': [('state', '!=', 'done')], 'readonly': [('picked', '=', True)]}"/>
+                <button name="totals" type="object" states="draft,assigned"/>
+            </xpath>
+            <field name="product_id" position="attributes">
+                <attribute name="attrs">{'readonly': [('state', 'in', ['done', 'cancel'])]}</attribute>
+            </field>
+        </field>
+    </record>
+
+    <record id="view_move_line_tree" model="ir.ui.view">
+        <field name="name">stock.move.line.tree.sample</field>
+        <field name="model">stock.move.line</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="product_id"/>
+                <field name="qty_done"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="action_move_lines" model="ir.actions.act_window">
+        <field name="name">Lines</field>
+        <field name="res_model">stock.move.line</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+</odoo>

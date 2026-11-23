@@ -1,0 +1,31 @@
+[build-system]
+requires = ["setuptools>=64"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "odoo-upgrade-check"
+dynamic = ["version"]
+description = "Find what breaks when an Odoo module moves to a newer version"
+readme = "README.md"
+license = { text = "MIT" }
+authors = [{ name = "Nguyen Thanh Phu" }]
+requires-python = ">=3.9"
+classifiers = [
+    "Framework :: Odoo",
+    "Environment :: Console",
+    "Topic :: Software Development :: Quality Assurance",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+]
+
+[project.urls]
+Source = "https://github.com/thanhphu2643/odoo-upgrade-check"
+
+[project.scripts]
+odoo-upgrade-check = "odoo_upgrade_check.cli:main"
+
+[tool.setuptools.dynamic]
+version = { attr = "odoo_upgrade_check.__version__" }
+
+[tool.setuptools.package-data]
+odoo_upgrade_check = ["data/*.json"]
