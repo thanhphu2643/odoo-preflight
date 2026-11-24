@@ -1,0 +1,410 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Odoo upgrade check: what breaks in Odoo 17 and 18</title>
+<meta name="description" content="Paste code from an Odoo 16 or 17 module and see what breaks in Odoo 17 or 18, line by line, with the fix.">
+<meta property="og:title" content="Odoo upgrade check">
+<meta property="og:description" content="Paste Odoo 16 or 17 code. See what breaks in 17 or 18, line by line, with the fix.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%23714b67'/><path d='M9 17l5 5 9-11' stroke='white' stroke-width='3.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>">
+<style>
+  :root {
+    --bg: #0a0a0b; --panel: #121214; --panel-2: #18181b; --line: #27272a; --line-2: #3f3f46;
+    --text: #fafafa; --muted: #a1a1aa; --faint: #71717a;
+    --accent: #c084fc; --accent-bg: #714b67;
+    --error: #f87171; --error-bg: rgb(248 113 113 / 0.12);
+    --warning: #fbbf24; --warning-bg: rgb(251 191 36 / 0.12);
+    --ok: #4ade80;
+    --mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+  }
+  * { box-sizing: border-box; }
+  html { color-scheme: dark; }
+  body { margin: 0; background: var(--bg); color: var(--text); font: 15px/1.55 -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, sans-serif; -webkit-font-smoothing: antialiased; }
+  a { color: inherit; }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .wrap { max-width: 1240px; margin: 0 auto; padding: 0 24px; }
+
+  header { padding: 40px 0 28px; }
+  .top { display: flex; justify-content: space-between; align-items: center; gap: 16px; }
+  .brand { display: flex; align-items: center; gap: 10px; font-family: var(--mono); font-size: 14px; color: var(--muted); text-decoration: none; }
+  .brand b { color: var(--text); font-weight: 600; }
+  .logo { width: 26px; height: 26px; border-radius: 7px; background: var(--accent-bg); display: grid; place-items: center; }
+  .gh { display: inline-flex; align-items: center; gap: 8px; padding: 7px 12px; border: 1px solid var(--line); border-radius: 8px; color: var(--muted); text-decoration: none; font-size: 13px; transition: color .15s, border-color .15s; }
+  .gh:hover { color: var(--text); border-color: var(--line-2); }
+  h1 { margin: 36px 0 10px; font-size: clamp(28px, 4vw, 42px); line-height: 1.15; letter-spacing: -0.02em; font-weight: 650; max-width: 22ch; }
+  .lead { margin: 0; color: var(--muted); font-size: 17px; max-width: 62ch; }
+
+  .toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin: 28px 0 14px; }
+  .seg { display: inline-flex; padding: 3px; background: var(--panel); border: 1px solid var(--line); border-radius: 10px; }
+  .seg button { appearance: none; border: 0; background: transparent; color: var(--muted); font: inherit; font-size: 13.5px; padding: 6px 12px; border-radius: 7px; cursor: pointer; transition: background .15s, color .15s; }
+  .seg button[aria-pressed="true"] { background: var(--panel-2); color: var(--text); box-shadow: 0 0 0 1px var(--line-2) inset; }
+  .seg button:hover { color: var(--text); }
+  select { appearance: none; font: inherit; font-size: 13.5px; color: var(--text); background: var(--panel) url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6'><path d='M1 1l4 4 4-4' stroke='%23a1a1aa' fill='none' stroke-width='1.5'/></svg>") no-repeat right 12px center; border: 1px solid var(--line); border-radius: 10px; padding: 8px 34px 8px 12px; cursor: pointer; }
+  .spacer { flex: 1; }
+  .btn { appearance: none; font: inherit; font-size: 13.5px; border-radius: 10px; padding: 8px 14px; cursor: pointer; border: 1px solid var(--line); background: var(--panel); color: var(--muted); transition: color .15s, border-color .15s, background .15s; }
+  .btn:hover { color: var(--text); border-color: var(--line-2); }
+  .btn.primary { background: var(--text); color: #09090b; border-color: var(--text); font-weight: 600; display: inline-flex; align-items: center; gap: 8px; }
+  .btn.primary:hover { background: #e4e4e7; }
+  .btn.primary:disabled { opacity: .6; cursor: progress; }
+  kbd { font-family: var(--mono); font-size: 11px; padding: 1px 5px; border-radius: 4px; background: rgb(0 0 0 / 0.1); }
+
+  .grid { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr); gap: 16px; align-items: start; }
+  @media (max-width: 900px) { .grid { grid-template-columns: 1fr; } }
+  .panel { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; overflow: hidden; }
+  .panel-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 10px 14px; border-bottom: 1px solid var(--line); font-size: 12.5px; color: var(--faint); font-family: var(--mono); }
+
+  .editor { position: relative; display: flex; height: 560px; font: 13px/20px var(--mono); }
+  @media (max-width: 900px) { .editor { height: 420px; } }
+  .gutter { margin: 0; padding: 14px 10px 14px 0; min-width: 48px; text-align: right; color: #52525b; overflow: hidden; user-select: none; border-right: 1px solid var(--line); background: #0f0f11; }
+  .gutter span { display: block; padding-left: 12px; }
+  .gutter span.hit { color: var(--error); }
+  .gutter span.hit.warning { color: var(--warning); }
+  textarea { flex: 1; margin: 0; border: 0; resize: none; padding: 14px; background: transparent; color: #e4e4e7; font: inherit; white-space: pre; overflow: auto; tab-size: 4; outline: none; }
+
+  .results { min-height: 200px; }
+  .summary { display: flex; align-items: center; gap: 10px; padding: 14px 16px; border-bottom: 1px solid var(--line); font-size: 14px; }
+  .summary .count { font-weight: 600; }
+  .dot { width: 8px; height: 8px; border-radius: 99px; background: var(--faint); flex: none; }
+  .summary.bad .dot { background: var(--error); } .summary.warn .dot { background: var(--warning); } .summary.good .dot { background: var(--ok); }
+  .list { list-style: none; margin: 0; padding: 0; max-height: 507px; overflow: auto; }
+  @media (max-width: 900px) { .list { max-height: none; } }
+  .item { padding: 14px 16px; border-bottom: 1px solid var(--line); }
+  .item:last-child { border-bottom: 0; }
+  .meta { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; font-size: 12.5px; }
+  .badge { font-family: var(--mono); font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .04em; padding: 2px 7px; border-radius: 6px; }
+  .badge.error { color: var(--error); background: var(--error-bg); }
+  .badge.warning { color: var(--warning); background: var(--warning-bg); }
+  .goto { appearance: none; border: 0; background: none; color: var(--muted); font: 12.5px var(--mono); padding: 0; cursor: pointer; text-decoration: underline; text-decoration-color: var(--line-2); text-underline-offset: 3px; }
+  .goto:hover { color: var(--text); }
+  .rule { font-family: var(--mono); color: var(--faint); }
+  .version { color: var(--faint); }
+  .message { margin: 8px 0 0; color: #e4e4e7; }
+  .fix { position: relative; margin: 10px 0 0; }
+  .fix pre { margin: 0; padding: 10px 44px 10px 12px; background: #0b0b0d; border: 1px solid var(--line); border-radius: 8px; font: 12.5px/1.6 var(--mono); color: #d4d4d8; white-space: pre-wrap; word-break: break-word; }
+  .fix .copy { position: absolute; top: 6px; right: 6px; appearance: none; border: 1px solid var(--line); background: var(--panel); color: var(--muted); border-radius: 6px; padding: 3px 7px; font-size: 11.5px; cursor: pointer; }
+  .fix .copy:hover { color: var(--text); }
+  .empty { padding: 40px 20px; text-align: center; color: var(--muted); font-size: 14px; }
+  .empty strong { display: block; color: var(--text); font-size: 15px; margin-bottom: 4px; }
+  .problem { margin: 16px; padding: 12px 14px; border-radius: 10px; background: var(--error-bg); color: #fecaca; font-size: 14px; }
+
+  .install { margin-top: 32px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+  @media (max-width: 900px) { .install { grid-template-columns: 1fr; } }
+  .card { padding: 18px; border: 1px solid var(--line); border-radius: 14px; background: var(--panel); }
+  .card h2 { margin: 0 0 6px; font-size: 15px; font-weight: 600; }
+  .card p { margin: 0; color: var(--muted); font-size: 14px; }
+  .card code { font-family: var(--mono); font-size: 12.5px; color: #e4e4e7; }
+  .cmd { display: flex; align-items: center; gap: 8px; margin-top: 10px; padding: 8px 10px; background: #0b0b0d; border: 1px solid var(--line); border-radius: 8px; font: 12px var(--mono); color: #d4d4d8; overflow-x: auto; white-space: nowrap; }
+  footer { margin: 40px 0; padding-top: 20px; border-top: 1px solid var(--line); color: var(--faint); font-size: 13px; display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px; }
+  .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="top">
+      <a class="brand" href="https://github.com/thanhphu2643/odoo-upgrade-check">
+        <span class="logo" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 32 32"><path d="M7 17l6 6 12-13" stroke="white" stroke-width="4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        <span><b>odoo-upgrade-check</b> v{{version}}</span>
+      </a>
+      <a class="gh" href="https://github.com/thanhphu2643/odoo-upgrade-check">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+        Source
+      </a>
+    </div>
+    <h1>See what breaks before you upgrade Odoo</h1>
+    <p class="lead">Paste a model, a view or a JS file from an Odoo 16 or 17 module. Get every line that fails in Odoo 17 or 18, why, and what to write instead.</p>
+  </header>
+
+  <main>
+    <div class="toolbar">
+      <div class="seg" role="group" aria-label="File type">
+        <button type="button" data-kind="python" aria-pressed="true">Python</button>
+        <button type="button" data-kind="xml" aria-pressed="false">XML view</button>
+        <button type="button" data-kind="js" aria-pressed="false">JavaScript</button>
+      </div>
+      <label class="sr" for="path">Upgrade</label>
+      <select id="path">
+        <option value="16-17">Odoo 16 → 17</option>
+        <option value="16-18">Odoo 16 → 18</option>
+        <option value="17-18">Odoo 17 → 18</option>
+      </select>
+      <span class="spacer"></span>
+      <button type="button" class="btn" id="example">Load example</button>
+      <button type="button" class="btn primary" id="run">Check <kbd>⌘↵</kbd></button>
+    </div>
+
+    <div class="grid">
+      <section class="panel" aria-label="Code">
+        <div class="panel-head"><span id="filename">models/sale_order.py</span><span id="size"></span></div>
+        <div class="editor">
+          <pre class="gutter" id="gutter" aria-hidden="true"></pre>
+          <label class="sr" for="code">Code to check</label>
+          <textarea id="code" spellcheck="false" autocapitalize="off" autocomplete="off" autocorrect="off"></textarea>
+        </div>
+      </section>
+
+      <section class="panel results" aria-label="Results" aria-live="polite" id="results">
+        <div class="empty"><strong>Nothing checked yet</strong>Paste code or load an example, then press Check.</div>
+      </section>
+    </div>
+
+    <div class="install">
+      <div class="card">
+        <h2>Check a whole repository</h2>
+        <p>Install the command and point it at your addons.</p>
+        <div class="cmd">pipx install git+https://github.com/thanhphu2643/odoo-upgrade-check</div>
+        <div class="cmd">odoo-upgrade-check path/to/addons --to 17</div>
+      </div>
+      <div class="card">
+        <h2>On every pull request</h2>
+        <p>With <code>--format github</code>, findings appear on the changed lines in GitHub Actions. It also runs as a pre-commit hook.</p>
+      </div>
+      <div class="card">
+        <h2>Checked against Odoo itself</h2>
+        <p>Every rule was checked in the source of the Odoo version it names, and the lists of removed models, fields, views and JS modules are extracted from the official Odoo 16, 17 and 18 images.</p>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <span>Your code is checked in memory and never stored.</span>
+    <span>Made by <a href="https://thanhphu2643.io.vn">Nguyễn Thanh Phú</a> · MIT</span>
+  </footer>
+</div>
+
+<script>
+const EXAMPLES = {
+  python: {
+    file: "models/stock_move_line.py",
+    code: `from odoo import api, fields, models
+
+
+class StockMoveLine(models.Model):
+    _inherit = "stock.move.line"
+
+    note = fields.Char(states={"done": [("readonly", True)]})
+    weight = fields.Float(group_operator="avg")
+
+    def name_get(self):
+        return [(line.id, f"{line.reference} ({line.qty_done})") for line in self]
+
+    @api.model
+    def _name_search(self, name, args=None, operator="ilike", limit=100, name_get_uid=None):
+        args = (args or []) + [("picked", "=", True)]
+        return super()._name_search(name, args, operator, limit, name_get_uid)
+
+    @api.depends("qty_done")
+    def _compute_weight(self):
+        for line in self:
+            line.weight = line.qty_done * line.product_id.weight
+
+    def action_totals(self):
+        if not self.user_has_groups("stock.group_stock_manager"):
+            return []
+        self.check_access_rights("read")
+        channel = self.env["mail.channel"].search([], limit=1)
+        done = self.env["stock.move.line"].search([("qty_done", ">", 0)])
+        return self._read_group([], fields=["weight"], groupby=["product_id"], lazy=False)
+`,
+  },
+  xml: {
+    file: "views/stock_move_line_views.xml",
+    code: `<odoo>
+    <record id="view_move_line_form" model="ir.ui.view">
+        <field name="name">stock.move.line.form.weight</field>
+        <field name="model">stock.move.line</field>
+        <field name="inherit_id" ref="stock.view_move_line_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='qty_done']" position="after">
+                <field name="weight" attrs="{'invisible': [('state', '!=', 'done')], 'readonly': [('picked', '=', True)]}"/>
+                <button name="action_totals" type="object" string="Totals" states="draft,assigned"/>
+            </xpath>
+            <field name="lot_id" position="attributes">
+                <attribute name="attrs">{'required': ['|', ('tracking', '=', 'lot'), ('tracking', '=', 'serial')]}</attribute>
+            </field>
+        </field>
+    </record>
+
+    <record id="view_move_line_weight_tree" model="ir.ui.view">
+        <field name="name">stock.move.line.tree.weight</field>
+        <field name="model">stock.move.line</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="product_id"/>
+                <field name="qty_done"/>
+                <field name="weight"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="action_move_line_weight" model="ir.actions.act_window">
+        <field name="name">Weights</field>
+        <field name="res_model">stock.move.line</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+</odoo>
+`,
+  },
+  js: {
+    file: "static/src/js/weight_field.js",
+    code: `/** @odoo-module **/
+
+import { registry } from "@web/core/registry";
+import { useService } from "@web/core/utils/hooks";
+import { FloatField } from "@web/views/fields/float/float_field";
+import { PosGlobalState } from "@point_of_sale/js/models";
+
+export class WeightField extends FloatField {
+    setup() {
+        super.setup();
+        this.rpc = useService("rpc");
+        this.label = this.env._t("Weight");
+    }
+
+    async onClick() {
+        const totals = await this.rpc("/stock/weight", { id: this.props.record.resId });
+        this.notification.add(this.env._t("Total: ") + totals.weight);
+    }
+}
+
+registry.category("fields").add("weight", WeightField);
+`,
+  },
+};
+
+const $ = (id) => document.getElementById(id);
+const code = $("code"), gutter = $("gutter"), results = $("results"), run = $("run");
+let kind = "python";
+let hits = {};
+
+function escape(text) {
+  return String(text).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
+}
+
+function renderGutter() {
+  const count = code.value.split("\n").length;
+  let html = "";
+  for (let i = 1; i <= count; i++) {
+    const hit = hits[i];
+    html += `<span class="${hit ? "hit " + hit : ""}">${i}</span>`;
+  }
+  gutter.innerHTML = html;
+  gutter.scrollTop = code.scrollTop;
+  $("size").textContent = `${count} lines`;
+}
+
+function setKind(next, loadExample) {
+  kind = next;
+  document.querySelectorAll(".seg button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.kind === kind)));
+  $("filename").textContent = EXAMPLES[kind].file;
+  if (loadExample) {
+    code.value = EXAMPLES[kind].code;
+    hits = {};
+    renderGutter();
+    check();
+  }
+}
+
+function goToLine(line) {
+  const lines = code.value.split("\n");
+  const start = lines.slice(0, line - 1).reduce((sum, l) => sum + l.length + 1, 0);
+  code.focus();
+  code.setSelectionRange(start, start + (lines[line - 1] || "").length);
+  const lineHeight = 20;
+  code.scrollTop = Math.max(0, (line - 1) * lineHeight - code.clientHeight / 3);
+}
+
+function render(data) {
+  hits = {};
+  if (data.error || data.parse_error) {
+    results.innerHTML = `<div class="problem">${escape(data.error || data.parse_error)}</div>`;
+    renderGutter();
+    return;
+  }
+  const findings = data.findings;
+  const errors = findings.filter((f) => f.severity === "error").length;
+  const warnings = findings.length - errors;
+  for (const f of findings) {
+    hits[f.line] = hits[f.line] === "error" || f.severity === "error" ? "error" : "warning";
+  }
+  renderGutter();
+  const [from, to] = $("path").value.split("-");
+  if (!findings.length) {
+    results.innerHTML = `<div class="summary good"><span class="dot"></span><span><span class="count">Nothing to fix</span> for Odoo ${to}.</span></div>
+      <div class="empty">No rule matched this code. Static checks cannot see everything, so still run your tests on Odoo ${to}.</div>`;
+    return;
+  }
+  const parts = [];
+  if (errors) parts.push(`${errors} error${errors > 1 ? "s" : ""}`);
+  if (warnings) parts.push(`${warnings} warning${warnings > 1 ? "s" : ""}`);
+  const items = findings.map((f, index) => `
+    <li class="item">
+      <div class="meta">
+        <span class="badge ${f.severity}">${f.severity}</span>
+        <button type="button" class="goto" data-line="${f.line}">Line ${f.line}</button>
+        <span class="version">Odoo ${f.version || to}</span>
+        <span class="rule">${escape(f.rule)}</span>
+      </div>
+      <p class="message">${escape(f.message)}</p>
+      ${f.fix ? `<div class="fix"><pre id="fix-${index}">${escape(f.fix)}</pre><button type="button" class="copy" data-copy="fix-${index}">Copy</button></div>` : ""}
+    </li>`).join("");
+  results.innerHTML = `<div class="summary ${errors ? "bad" : "warn"}"><span class="dot"></span>
+      <span><span class="count">${parts.join(", ")}</span> moving from Odoo ${from} to ${to}</span></div>
+    <ul class="list">${items}</ul>`;
+}
+
+async function check() {
+  if (!code.value.trim()) {
+    results.innerHTML = `<div class="empty"><strong>Nothing to check</strong>Paste code or load an example.</div>`;
+    return;
+  }
+  const [from, to] = $("path").value.split("-").map(Number);
+  run.disabled = true;
+  try {
+    const response = await fetch("/api/check", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ kind, code: code.value, from, to }),
+    });
+    render(await response.json());
+  } catch {
+    render({ error: "The check could not run. Try again in a moment." });
+  } finally {
+    run.disabled = false;
+  }
+}
+
+document.querySelectorAll(".seg button").forEach((b) => b.addEventListener("click", () => setKind(b.dataset.kind, !code.value.trim() || Object.values(EXAMPLES).some((e) => e.code === code.value))));
+$("example").addEventListener("click", () => setKind(kind, true));
+$("path").addEventListener("change", check);
+run.addEventListener("click", check);
+code.addEventListener("input", () => { hits = {}; renderGutter(); });
+code.addEventListener("scroll", () => { gutter.scrollTop = code.scrollTop; });
+code.addEventListener("keydown", (event) => {
+  if ((event.metaKey || event.ctrlKey) && event.key === "Enter") {
+    event.preventDefault();
+    check();
+  } else if (event.key === "Tab" && !event.shiftKey) {
+    event.preventDefault();
+    code.setRangeText("    ", code.selectionStart, code.selectionEnd, "end");
+    renderGutter();
+  }
+});
+results.addEventListener("click", async (event) => {
+  const goto = event.target.closest(".goto");
+  if (goto) goToLine(Number(goto.dataset.line));
+  const copy = event.target.closest(".copy");
+  if (copy) {
+    await navigator.clipboard.writeText($(copy.dataset.copy).textContent);
+    copy.textContent = "Copied";
+    setTimeout(() => (copy.textContent = "Copy"), 1200);
+  }
+});
+if (!/Mac|iPhone|iPad/.test(navigator.platform)) run.querySelector("kbd").textContent = "Ctrl↵";
+
+setKind("python", true);
+</script>
+</body>
+</html>

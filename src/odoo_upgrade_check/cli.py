@@ -77,6 +77,35 @@ def check_module(module, rules, target):
     return sorted(findings, key=lambda f: (str(f.path), f.line, f.column))
 
 
+XML_DOCUMENTS = {"odoo", "openerp", "data", "record", "template", "templates", "function", "menuitem"}
+# Wraps a bare view architecture on its first line, so line numbers stay the same.
+XML_WRAPPER = ('<odoo><record id="snippet" model="ir.ui.view"><field name="arch" type="xml">', "</field></record></odoo>")
+
+
+def check_source(kind, source, version_from, version_to):
+    """Findings for the content of one file (python, xml or js), e.g. pasted in the web page.
+
+    Raises SyntaxError when it cannot be parsed.
+    """
+    from .core import Finding
+    rules = [r for r in RULES if r.kind == kind and r.version and version_from < r.version <= version_to]
+    if kind == "xml":
+        try:
+            parsed = parse(kind, source)
+            wrap = not parsed.children or parsed.children[0].tag not in XML_DOCUMENTS
+        except SyntaxError:
+            wrap = True  # several elements, e.g. a few fields of a view
+        if wrap:
+            parsed = parse(kind, XML_WRAPPER[0] + source.lstrip("\ufeff") + XML_WRAPPER[1])
+    else:
+        wrap = False
+        parsed = parse(kind, source)
+    shift = len(XML_WRAPPER[0]) if wrap else 0
+    findings = [Finding(item, Path("snippet"), line, column - shift if line == 1 else column, message, fix)
+                for item in rules for line, column, message, fix in item.check(parsed)]
+    return sorted(findings, key=lambda f: (f.line, f.column))
+
+
 def parse(kind, source):
     if kind == "python":
         import ast

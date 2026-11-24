@@ -147,6 +147,10 @@ def parse_xml(text):
         if not current[-1].children:
             current[-1].text += text
 
+    def no_doctype(*_args):
+        raise expat.ExpatError("DOCTYPE is not allowed")  # no entity expansion tricks
+
     parser.StartElementHandler, parser.EndElementHandler, parser.CharacterDataHandler = start, end, data
+    parser.StartDoctypeDeclHandler = parser.EntityDeclHandler = no_doctype
     parser.Parse(text, True)
     return root

@@ -29,3 +29,7 @@ version = { attr = "odoo_upgrade_check.__version__" }
 
 [tool.setuptools.package-data]
 odoo_upgrade_check = ["data/*.json"]
+
+# The demo page (web/), deployed on Vercel.
+[tool.vercel]
+entrypoint = "web.app:app"
