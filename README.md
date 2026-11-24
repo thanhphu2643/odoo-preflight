@@ -2,6 +2,8 @@
 
 Find what breaks when an Odoo module moves to a newer version, before you install it there.
 
+**Try it in the browser: [odoo-upgrade-check-five.vercel.app](https://odoo-upgrade-check-five.vercel.app)**. Paste a model, a view or a JS file and see the result.
+
 ```text
 $ odoo-upgrade-check pos_vietqr
 pos_vietqr/__manifest__.py:16:10  error  Odoo 17 has no asset bundle 'point_of_sale.assets'. [removed-dependency]
@@ -130,6 +132,7 @@ run in CI on every pull request.
 ```sh
 python -m unittest discover -s tests -t .
 python tools/build_data.py   # regenerate src/odoo_upgrade_check/data/ (needs Docker)
+python -m web.app            # the demo page on http://localhost:8000
 ```
 
 ## License
