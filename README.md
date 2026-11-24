@@ -2,7 +2,7 @@
 
 Find what breaks when an Odoo module moves to a newer version, before you install it there.
 
-**Try it in the browser: [odoo-upgrade-check-five.vercel.app](https://odoo-upgrade-check-five.vercel.app)**. Paste a model, a view or a JS file and see the result.
+**Try it in the browser: [odoo-upgrade-check.vercel.app](https://odoo-upgrade-check.vercel.app)**. Paste a model, a view or a JS file and see the result.
 
 ```text
 $ odoo-preflight pos_vietqr
