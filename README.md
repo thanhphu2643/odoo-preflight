@@ -1,11 +1,11 @@
-# odoo-upgrade-check
+# Preflight
 
 Find what breaks when an Odoo module moves to a newer version, before you install it there.
 
 **Try it in the browser: [odoo-upgrade-check-five.vercel.app](https://odoo-upgrade-check-five.vercel.app)**. Paste a model, a view or a JS file and see the result.
 
 ```text
-$ odoo-upgrade-check pos_vietqr
+$ odoo-preflight pos_vietqr
 pos_vietqr/__manifest__.py:16:10  error  Odoo 17 has no asset bundle 'point_of_sale.assets'. [removed-dependency]
     → "point_of_sale._assets_pos"
 pos_vietqr/static/src/js/payment_vietqr.js:6:25  error  Odoo 17 has no legacy module 'point_of_sale.models': rewrite this file as an ES module. [removed-js-module]
@@ -26,7 +26,7 @@ dependencies.
 ## Install
 
 ```sh
-pipx install git+https://github.com/thanhphu2643/odoo-upgrade-check
+pipx install git+https://github.com/thanhphu2643/odoo-preflight
 ```
 
 Python 3.9 or newer.
@@ -34,11 +34,11 @@ Python 3.9 or newer.
 ## Use
 
 ```sh
-odoo-upgrade-check path/to/addons            # each module to the next version (16 -> 17)
-odoo-upgrade-check my_module --to 18         # 16 -> 18: the 17 and 18 rules together
-odoo-upgrade-check . --from 16 --to 17       # when the manifest version does not say
-odoo-upgrade-check . --format json           # for scripts
-odoo-upgrade-check --list-rules
+odoo-preflight path/to/addons            # each module to the next version (16 -> 17)
+odoo-preflight my_module --to 18         # 16 -> 18: the 17 and 18 rules together
+odoo-preflight . --from 16 --to 17       # when the manifest version does not say
+odoo-preflight . --format json           # for scripts
+odoo-preflight --list-rules
 ```
 
 It exits with 1 when it finds an error (`--strict`: a warning too), so it can gate CI.
@@ -46,17 +46,17 @@ It exits with 1 when it finds an error (`--strict`: a warning too), so it can ga
 **GitHub Actions**: with `--format github`, the findings show up on the lines of the pull request.
 
 ```yaml
-- run: pipx install git+https://github.com/thanhphu2643/odoo-upgrade-check
-- run: odoo-upgrade-check . --to 17 --format github
+- run: pipx install git+https://github.com/thanhphu2643/odoo-preflight
+- run: odoo-preflight . --to 17 --format github
 ```
 
 **pre-commit**
 
 ```yaml
-- repo: https://github.com/thanhphu2643/odoo-upgrade-check
+- repo: https://github.com/thanhphu2643/odoo-preflight
   rev: main
   hooks:
-    - id: odoo-upgrade-check
+    - id: odoo-preflight
       args: [--to, "17"]
 ```
 
@@ -131,7 +131,7 @@ run in CI on every pull request.
 
 ```sh
 python -m unittest discover -s tests -t .
-python tools/build_data.py   # regenerate src/odoo_upgrade_check/data/ (needs Docker)
+python tools/build_data.py   # regenerate src/odoo_preflight/data/ (needs Docker)
 python -m web.app            # the demo page on http://localhost:8000
 ```
 

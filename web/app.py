@@ -15,8 +15,8 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "src"))
 
-from odoo_upgrade_check import __version__  # noqa: E402
-from odoo_upgrade_check.cli import LATEST, check_source  # noqa: E402
+from odoo_preflight import __version__  # noqa: E402
+from odoo_preflight.cli import LATEST, check_source  # noqa: E402
 
 PAGE = (Path(__file__).parent / "index.html").read_text(encoding="utf-8").replace("{{version}}", __version__)
 MAX_CODE = 100_000

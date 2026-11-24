@@ -1,6 +1,6 @@
 import unittest
 
-from odoo_upgrade_check.domain import Unsupported, attrs_to_attributes, domain_to_expression, states_to_invisible
+from odoo_preflight.domain import Unsupported, attrs_to_attributes, domain_to_expression, states_to_invisible
 
 
 class TestDomain(unittest.TestCase):

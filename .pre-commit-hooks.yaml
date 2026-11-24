@@ -1,6 +1,6 @@
-- id: odoo-upgrade-check
-  name: Odoo upgrade check
-  entry: odoo-upgrade-check
+- id: odoo-preflight
+  name: Odoo preflight
+  entry: odoo-preflight
   language: python
   pass_filenames: false
   always_run: true

@@ -3,7 +3,7 @@
     python3 tools/build_data.py            # extracts from the odoo:16/17/18 Docker images
     python3 tools/build_data.py --cached   # reuses tools/api/odoo-*.json
 
-For each upgrade (16 -> 17, 17 -> 18) it writes src/odoo_upgrade_check/data/upgrade-<to>.json
+For each upgrade (16 -> 17, 17 -> 18) it writes src/odoo_preflight/data/upgrade-<to>.json
 with the addons, asset bundles, JS modules, views, templates, models and fields that the
 older version had and the newer one does not.
 """
@@ -15,7 +15,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 API = ROOT / "tools" / "api"
-OUT = ROOT / "src" / "odoo_upgrade_check" / "data"
+OUT = ROOT / "src" / "odoo_preflight" / "data"
 VERSIONS = (16, 17, 18)
 ADDONS = "/usr/lib/python3/dist-packages/odoo/addons"
 # Every model has these; some versions also declare them explicitly.

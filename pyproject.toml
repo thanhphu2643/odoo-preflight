@@ -3,7 +3,7 @@ requires = ["setuptools>=64"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "odoo-upgrade-check"
+name = "odoo-preflight"
 dynamic = ["version"]
 description = "Find what breaks when an Odoo module moves to a newer version"
 readme = "README.md"
@@ -19,16 +19,16 @@ classifiers = [
 ]
 
 [project.urls]
-Source = "https://github.com/thanhphu2643/odoo-upgrade-check"
+Source = "https://github.com/thanhphu2643/odoo-preflight"
 
 [project.scripts]
-odoo-upgrade-check = "odoo_upgrade_check.cli:main"
+odoo-preflight = "odoo_preflight.cli:main"
 
 [tool.setuptools.dynamic]
-version = { attr = "odoo_upgrade_check.__version__" }
+version = { attr = "odoo_preflight.__version__" }
 
 [tool.setuptools.package-data]
-odoo_upgrade_check = ["data/*.json"]
+odoo_preflight = ["data/*.json"]
 
 # The demo page (web/), deployed on Vercel.
 [tool.vercel]

@@ -11,7 +11,7 @@ LATEST = 18
 
 def main(argv=None):
     parser = argparse.ArgumentParser(
-        prog="odoo-upgrade-check",
+        prog="odoo-preflight",
         description="Find what breaks when Odoo modules move to a newer version.",
     )
     parser.add_argument("paths", nargs="*", default=["."], help="modules, or folders that contain modules")

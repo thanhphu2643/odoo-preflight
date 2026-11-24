@@ -4,7 +4,7 @@ import unittest
 from contextlib import redirect_stdout
 from pathlib import Path
 
-from odoo_upgrade_check.cli import main
+from odoo_preflight.cli import main
 
 SAMPLE = Path(__file__).parent / "fixtures" / "sample16"
 
